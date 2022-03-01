@@ -2,6 +2,7 @@ package com.example.itemshop_android
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.itemshop_android.api_itemshop.APIService
@@ -13,8 +14,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import java.util.*
-import kotlin.concurrent.timerTask
 
 class MainActivity : AppCompatActivity() {
 
@@ -39,21 +38,18 @@ class MainActivity : AppCompatActivity() {
 
     private fun getItemList(query: String){
         CoroutineScope(Dispatchers.IO).launch {
-            val call = getRetrofit().create(APIService::class.java).getItems(query)
-            val response = call.body()
-            runOnUiThread {
-                if (call.isSuccessful){
-                    val itemsResponse = response ?: emptyList()
-                    itemsResponse.forEach {
-                        println(it.name)
-                    }
-                    itemList.clear()
-                    itemList.addAll(itemsResponse)
-                    adapter.notifyDataSetChanged()
-                }else{
-                    Toast.makeText(this@MainActivity, "Error al obtener los datos", Toast.LENGTH_SHORT).show()
+            try {
+                val call = getRetrofit().create(APIService::class.java).getItems(query)
+                val response = call.body()
+                runOnUiThread {
+                    if (call.isSuccessful) {
+                        val itemsResponse = response ?: emptyList()
+                        itemList.clear()
+                        itemList.addAll(itemsResponse)
+                        adapter.notifyDataSetChanged()
+                    } else Toast.makeText(this@MainActivity,"Error al obtener los datos", Toast.LENGTH_SHORT).show()
                 }
-            }
+            } catch (e: Exception){ runOnUiThread { Toast.makeText(this@MainActivity,"Error al obtener los datos", Toast.LENGTH_SHORT).show() }}
         }
     }
 
